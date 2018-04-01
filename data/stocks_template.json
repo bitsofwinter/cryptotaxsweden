@@ -1,0 +1,7 @@
+{
+	"_comment": "Trades which should be reported under section A on K4",
+	"trades": [
+		{"name": ..., "amount": ..., "income": ..., "costbase": ...}
+		...
+	]
+}
