@@ -1,0 +1,11 @@
+__pycache__
+.idea
+.mypy_cache
+.DS_Store
+*.pyc
+venv
+out
+data/personal_details.json
+data/trades.csv
+data/fees.json
+data/stocks.json
