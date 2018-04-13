@@ -12,7 +12,7 @@ class PersonalDetails:
 
     @staticmethod
     def read_from(filename):
-        with open(filename, encoding="utf-8") as f:
+        with open(filename, encoding="utf-8-sig") as f:
             d = json.load(f)
             return PersonalDetails(d["namn"], d["personnummer"], d["postnummer"], d["postort"])
 
@@ -23,7 +23,7 @@ class Fees:
 
     @staticmethod
     def read_from(filename):
-        with open(filename, encoding="utf-8") as f:
+        with open(filename, encoding="utf-8-sig") as f:
             d = json.load(f)
             return Fees(d["fees"])
 
@@ -49,7 +49,7 @@ class Trades:
 
     @staticmethod
     def read_from(filename):
-        with open(filename, encoding='utf-8') as f:
+        with open(filename, encoding='utf-8-sig') as f:
             lines = [line for line in csv.reader(f, delimiter=',', quotechar='"')]
 
         def indices(col_name):
@@ -108,7 +108,7 @@ class TaxEvent:
 
     @staticmethod
     def read_stock_tax_events_from(filename:str):
-        with open(filename, encoding="utf-8") as f:
+        with open(filename, encoding="utf-8-sig") as f:
             d = json.load(f)
             events = []
             for event in d["trades"]:
