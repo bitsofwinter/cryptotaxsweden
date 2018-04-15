@@ -232,3 +232,4 @@ def output_totals(tax_events, stock_tax_events = None):
     print("Section D")
     print(f"  Summed profit (box 7.5): {crypto_total_profit}")
     print(f"  Summed loss (box 8.4): {crypto_total_loss}")
+    print(f"  Section D Tax: {round(0.3*(crypto_total_profit - 0.7*crypto_total_loss))}")
