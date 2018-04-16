@@ -18,6 +18,7 @@ parser = argparse.ArgumentParser(description='Swedish cryptocurrency tax reporti
 parser.add_argument('year', type=int,
                     help='Tax year to create report for')
 parser.add_argument('--trades', help='Read trades from csv file', default='data/trades.csv')
+parser.add_argument('--out', help='Output folder', default='out')
 parser.add_argument('--format', type=Format, choices=list(Format), default=Format.sru,
                     help='The file format of the generated report')
 parser.add_argument('--decimal-sru', help='Report decimal amounts in sru mode (not supported by Skatteverket yet)', action='store_true')
@@ -25,8 +26,8 @@ parser.add_argument('--exclude-groups', nargs='*', help='Exclude cointracking gr
 parser.add_argument('--coin-report', help='Generate report of remaining coins and their cost basis at end of year', action='store_true')
 opts = parser.parse_args()
 
-if not os.path.isdir("out"):
-    os.makedirs("out")
+if not os.path.isdir(opts.out):
+    os.makedirs(opts.out)
 
 personal_details = PersonalDetails.read_from("data/personal_details.json")
 trades = Trades.read_from(opts.trades)
@@ -36,7 +37,7 @@ tax_events = tax.compute_tax(trades,
                              datetime.datetime(year=opts.year,month=1,day=1,hour=0, minute=0),
                              datetime.datetime(year=opts.year,month=12,day=31,hour=23, minute=59),
                              exclude_groups=opts.exclude_groups if opts.exclude_groups else [],
-                             coin_report_filename="out/coin_report.csv" if opts.coin_report else None
+                             coin_report_filename=opts.out+"/coin_report.csv" if opts.coin_report else None
                              )
 
 if opts.format == Format.sru and not opts.decimal_sru:
@@ -47,8 +48,8 @@ tax_events = tax.convert_sek_to_integer_amounts(tax_events)
 pages = tax.generate_k4_pages(opts.year, personal_details, tax_events, stock_tax_events=stock_tax_events)
 
 if opts.format == Format.sru:
-    tax.generate_k4_sru(pages, personal_details, "out")
+    tax.generate_k4_sru(pages, personal_details, opts.out)
 elif opts.format == Format.pdf:
-    tax.generate_k4_pdf(pages, "out")
+    tax.generate_k4_pdf(pages, opts.out)
 
 tax.output_totals(tax_events, stock_tax_events=stock_tax_events)
