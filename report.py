@@ -25,6 +25,9 @@ parser.add_argument('--exclude-groups', nargs='*', help='Exclude cointracking gr
 parser.add_argument('--coin-report', help='Generate report of remaining coins and their cost basis at end of year', action='store_true')
 opts = parser.parse_args()
 
+if not os.path.isdir("out"):
+    os.makedirs("out")
+
 personal_details = PersonalDetails.read_from("data/personal_details.json")
 trades = Trades.read_from(opts.trades)
 stock_tax_events = TaxEvent.read_stock_tax_events_from("data/stocks.json") if os.path.exists("data/stocks.json") else None
