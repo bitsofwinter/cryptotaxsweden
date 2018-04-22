@@ -59,12 +59,17 @@ def compute_tax(trades, from_date, to_date, native_currency='SEK', exclude_group
 
         if trade.type == 'Trade':
             buy_coin = get_buy_coin(trade)
-            if buy_coin:
-                buy_coin.buy(trade.buy_amount, trade.buy_value)
-
             sell_coin = get_sell_coin(trade)
+
+            if trade.sell_coin == native_currency:
+                value_sek = trade.sell_value
+            else:
+                value_sek = trade.buy_value
+
+            if buy_coin:
+                buy_coin.buy(trade.buy_amount, value_sek)
             if sell_coin:
-                tax_event = sell_coin.sell(trade.sell_amount, trade.sell_value)
+                tax_event = sell_coin.sell(trade.sell_amount, value_sek)
                 if trade.date >= from_date:
                     tax_events.append(tax_event)
         
