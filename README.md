@@ -29,11 +29,14 @@ will give you a 10% discount if you decide to buy a Pro or Unlimited account.
 The sru format is currently limited in that it doesn't allow
 decimals, this is a limitation with skatteverket.se. The
 recommendation from Skatteverket is to round to whole numbers
-even if that results in 0 BTC or similar being reported.
+even if that results in 0 BTC or similar being reported and then
+report what roundings have been done under Övriga Upplysningar.
 
-If the result is a report with a lot of zero amounts of cryptos
-reported then you should mention why it looks like this in
-"Övriga upplysningar" on the tax report.
+The script can now generate a rounding report which can be
+pasted in Övriga Upplysningar. Skatteverket limits the size of
+this field to 999 characters so it is best to combine this with
+doing a simplified K4 report to reduce the number of lines which
+has to be reported in the K4.
 
 ## Liability
 
@@ -111,9 +114,11 @@ enter them in `data/stocks.json`. See `data/stocks_template.json` for the format
 ### Options
 
 ```
-usage: report.py [-h] [--trades TRADES] [--format {pdf,sru}] [--decimal-sru]
+usage: report.py [-h] [--trades TRADES] [--out OUT] [--format {pdf,sru}]
+                 [--decimal-sru]
                  [--exclude-groups [EXCLUDE_GROUPS [EXCLUDE_GROUPS ...]]]
-                 [--coin-report]
+                 [--coin-report] [--simplified-k4] [--rounding-report]
+                 [--rounding-report-threshold ROUNDING_REPORT_THRESHOLD]
                  year
 
 Swedish cryptocurrency tax reporting script
@@ -124,6 +129,7 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   --trades TRADES       Read trades from csv file
+  --out OUT             Output folder
   --format {pdf,sru}    The file format of the generated report
   --decimal-sru         Report decimal amounts in sru mode (not supported by
                         Skatteverket yet)
@@ -131,17 +137,35 @@ optional arguments:
                         Exclude cointracking group from report
   --coin-report         Generate report of remaining coins and their cost
                         basis at end of year
+  --simplified-k4       Generate simplified K4 with only two line per coin
+                        type (aggregated profit and loss).
+  --rounding-report     Generate report of roundings done which can be pasted
+                        in Ovriga Upplysningar, the file will be put in the
+                        out folder.
+  --rounding-report-threshold ROUNDING_REPORT_THRESHOLD
+                        The number of percent difference required for an
+                        amount to be included in the report.
 ```
 
 ### Example
 
-#### Generate report for 2017 in sru format.
+#### Generate a simplified report for 2017 in sru format.
 
 ```
-python report.py 2017
+python report.py 2017 --simplified-k4
 ```
 
 Generated sru files can be found in the ```out``` folder.
+
+Generated sru files can be tested for errors at [https://www.skatteverket.se/filoverforing]
+
+#### Generate a simplified report for 2017 in sru format with a rounding report with threshold of 1%.
+
+```
+python report.py 2017 --simplified-k4 --rounding-report --rounding-report-threshold=1
+```
+
+Generated sru files and the rounding report can be found in the ```out``` folder.
 
 Generated sru files can be tested for errors at [https://www.skatteverket.se/filoverforing]
 
