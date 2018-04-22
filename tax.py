@@ -78,6 +78,11 @@ def compute_tax(trades, from_date, to_date, native_currency='SEK', exclude_group
             if buy_coin:
                 buy_coin.buy(trade.buy_amount, trade.buy_value)
 
+        elif trade.type == 'Deposit':
+            buy_coin = get_buy_coin(trade)
+            if buy_coin:
+                buy_coin.buy(trade.buy_amount, trade.buy_value)
+                
         elif trade.type == 'Gift/Tip':
             buy_coin = get_buy_coin(trade)
             if buy_coin:
