@@ -24,6 +24,7 @@ parser.add_argument('--format', type=Format, choices=list(Format), default=Forma
 parser.add_argument('--decimal-sru', help='Report decimal amounts in sru mode (not supported by Skatteverket yet)', action='store_true')
 parser.add_argument('--exclude-groups', nargs='*', help='Exclude cointracking group from report')
 parser.add_argument('--coin-report', help='Generate report of remaining coins and their cost basis at end of year', action='store_true')
+parser.add_argument('--simplified-k4', help='Generate simplified K4 with only two line per coin type (aggregated profit and loss).', action='store_true')
 opts = parser.parse_args()
 
 if not os.path.isdir(opts.out):
@@ -39,6 +40,9 @@ tax_events = tax.compute_tax(trades,
                              exclude_groups=opts.exclude_groups if opts.exclude_groups else [],
                              coin_report_filename=opts.out+"/coin_report.csv" if opts.coin_report else None
                              )
+
+if opts.simplified_k4:
+    tax_events = tax.aggregate_per_coin(tax_events)
 
 if opts.format == Format.sru and not opts.decimal_sru:
     tax_events = tax.convert_to_integer_amounts(tax_events)

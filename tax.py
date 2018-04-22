@@ -94,6 +94,31 @@ def compute_tax(trades, from_date, to_date, native_currency='SEK', exclude_group
     return tax_events
 
 
+def aggregate_per_coin(tax_events):
+    aggregate_tax_events = {}
+    for tax_event in tax_events:
+        if tax_event.name not in aggregate_tax_events:
+            aggregate_tax_events[tax_event.name] = (TaxEvent(0.0, tax_event.name, 0.0, 0.0), TaxEvent(0.0, tax_event.name, 0.0, 0.0))
+        (aggregate_profit_tax_event, aggregate_loss_tax_event) = aggregate_tax_events[tax_event.name]
+        if tax_event.profit() > 0.0:
+            aggregate_profit_tax_event.amount += tax_event.amount
+            aggregate_profit_tax_event.income += tax_event.income
+            aggregate_profit_tax_event.cost += tax_event.cost
+        else:
+            aggregate_loss_tax_event.amount += tax_event.amount
+            aggregate_loss_tax_event.income += tax_event.income
+            aggregate_loss_tax_event.cost += tax_event.cost
+
+    sorted_aggregate_events = list(aggregate_tax_events.items())
+    sorted_aggregate_events.sort()
+    new_tax_events = []
+    for (name, (aggregate_profit_tax_event, aggregate_loss_tax_event)) in sorted_aggregate_events:
+        if (aggregate_profit_tax_event.amount > 0.0):
+            new_tax_events.append(aggregate_profit_tax_event)
+        if (aggregate_loss_tax_event.amount > 0.0):
+            new_tax_events.append(aggregate_loss_tax_event)
+    return new_tax_events
+
 def convert_to_integer_amounts(tax_events):
     new_events = []
     for tax_event in tax_events:
