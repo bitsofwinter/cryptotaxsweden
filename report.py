@@ -25,6 +25,8 @@ parser.add_argument('--decimal-sru', help='Report decimal amounts in sru mode (n
 parser.add_argument('--exclude-groups', nargs='*', help='Exclude cointracking group from report')
 parser.add_argument('--coin-report', help='Generate report of remaining coins and their cost basis at end of year', action='store_true')
 parser.add_argument('--simplified-k4', help='Generate simplified K4 with only two line per coin type (aggregated profit and loss).', action='store_true')
+parser.add_argument('--rounding-report', help='Generate report of roundings done which can be pasted in Ovriga Upplysningar, the file will be put in the out folder.', action='store_true')
+parser.add_argument('--rounding-report-threshold', help='The number of percent difference required for an amount to be included in the report.', default='1')
 opts = parser.parse_args()
 
 if not os.path.isdir(opts.out):
@@ -38,13 +40,16 @@ tax_events = tax.compute_tax(trades,
                              datetime.datetime(year=opts.year,month=1,day=1,hour=0, minute=0),
                              datetime.datetime(year=opts.year,month=12,day=31,hour=23, minute=59),
                              exclude_groups=opts.exclude_groups if opts.exclude_groups else [],
-                             coin_report_filename=opts.out+"/coin_report.csv" if opts.coin_report else None
+                             coin_report_filename=os.path.join(opts.out, "coin_report.csv") if opts.coin_report else None
                              )
 
 if opts.simplified_k4:
     tax_events = tax.aggregate_per_coin(tax_events)
 
 if opts.format == Format.sru and not opts.decimal_sru:
+    if opts.rounding_report:
+        threshold = float(opts.rounding_report_threshold) / 100.0
+        tax.rounding_report(tax_events, threshold, os.path.join(opts.out, "rounding_report.txt"))
     tax_events = tax.convert_to_integer_amounts(tax_events)
 
 tax_events = tax.convert_sek_to_integer_amounts(tax_events)

@@ -119,6 +119,22 @@ def aggregate_per_coin(tax_events):
             new_tax_events.append(aggregate_loss_tax_event)
     return new_tax_events
 
+
+def rounding_report(tax_events, threshold, report_filename):
+    with open(report_filename, 'w', encoding='utf-8') as f:
+        f.write(f"Decimaler stöds ej för bilaga K4 på skatteverket.se.\n")
+        f.write(f"Här är en lista på avrundningar där det avrundade antalet skiljer sig mer än {str(threshold*100)[:4]}% från det egentliga antalet:\n")
+        f.write(f"\n")
+        for tax_event in tax_events:
+            original = tax_event.amount
+            rounded = round(tax_event.amount)
+            if abs(rounded - original) / original > threshold:
+                f.write(f"{original} {tax_event.name} har avrundats till {rounded} {tax_event.name}\n")
+
+    if os.stat(report_filename).st_size > 999:
+        raise Exception("Rounding report is longer than 999 characters (the limit on skatteverket.se), consider increasing the threshold --rounding-report-threshold and doing a simplified K4 --simplified-k4.")
+
+
 def convert_to_integer_amounts(tax_events):
     new_events = []
     for tax_event in tax_events:
