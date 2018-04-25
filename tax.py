@@ -83,6 +83,13 @@ def compute_tax(trades, from_date, to_date, native_currency='SEK', exclude_group
             if buy_coin:
                 buy_coin.buy(trade.buy_amount, 0.0)
 
+        elif trade.type == 'Spend':
+            sell_coin = get_sell_coin(trade)
+            if sell_coin:
+                tax_event = sell_coin.sell(trade.sell_amount, trade.sell_value)
+                if trade.date >= from_date:
+                    tax_events.append(tax_event)
+
     if coin_report_filename:
         with open(coin_report_filename, "w") as f:
             f.write("Amount\tCoin\tCost basis\n")

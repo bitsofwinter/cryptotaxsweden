@@ -32,6 +32,7 @@ was received. The actual income should be declared manually on a
 [T2 form "Inkomst av tjänst för inkomstgivande hobby"](https://www.skatteverket.se/privat/sjalvservice/blanketterbroschyrer/blanketter/info/2051.4.39f16f103821c58f680006232.html).
 * Gift/Tip (only income): Used for reporting hard forks and airdrops, these
 cryptos will get a cost basis of 0.
+* Spend: Used when paying with crypto, treated as a sell of the currency in question.
 
 A common mistake is to forget to report the conversion to/from Euro which
 the bank does when transfering to an exchange such as Kraken/Bitstamp. There
@@ -41,7 +42,7 @@ are EUR available when later exchanging it to crypto.
 Withdrawals/Deposits are ignored for the tax report as these are assumed to be
 transfers of funds between wallets owned by you.
 
-If you have other types of income or have used crypto to pay for things, this isn't
+If you have other types of income in crypto this isn't
 handled by the script yet.
 
 Adding new rules for handling more situations shouln't be that hard as long as
