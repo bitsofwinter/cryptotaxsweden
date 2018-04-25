@@ -24,6 +24,31 @@ will give you a 10% discount if you decide to buy a Pro or Unlimited account.
 * BTC: `3KTLVpWjRGuJNBmjsKo4HGDG1G5SCesej3`
 * ETH: `0x05125B8E6598AbDDe21c7D01008a10F6107Ce004`
 
+## How coins should be entered on [cointracking.info](https://cointracking.info?ref=D611015)
+
+* Trade: Trades fiat->crypto, crypto->crypto and crypto->fiat.
+* Mining (only income): Gets a cost basis of the value at the time the crypto
+was received. The actual income should be declared manually on a
+[T2 form "Inkomst av tjänst för inkomstgivande hobby"](https://www.skatteverket.se/privat/sjalvservice/blanketterbroschyrer/blanketter/info/2051.4.39f16f103821c58f680006232.html).
+* Gift/Tip (only income): Used for reporting hard forks and airdrops, these
+cryptos will get a cost basis of 0.
+
+A common mistake is to forget to report the conversion to/from Euro which
+the bank does when transfering to an exchange such as Kraken/Bitstamp. There
+should be a trade between SEK and EUR on cointracking to make sure that there
+are EUR available when later exchanging it to crypto.
+
+Withdrawals/Deposits are ignored for the tax report as these are assumed to be
+transfers of funds between wallets owned by you.
+
+If you have other types of income or have used crypto to pay for things, this isn't
+handled by the script yet.
+
+Adding new rules for handling more situations shouln't be that hard as long as
+it is easy to define the cost basis for an income and what the price should be
+when selling crypto. You can add feature requests and if it isn't to complicated
+I'll try to add it to the script, or you can submit a pull request.
+
 ## Limitations
 
 The sru format is currently limited in that it doesn't allow
@@ -82,7 +107,7 @@ pip install -r requirements.txt
 
 ### data/personal_details.json
 
-This file should have the following format.
+This file should have the following format. Make sure to save the file in UTF-8 format. On Windows you can install Notepad++ to make this easier.
 
 ```
 {
@@ -99,10 +124,6 @@ To get the data for this file you first need to have your complete trade history
 on [cointracking.info](https://cointracking.info?ref=D611015). Then go to the
 Trade Prices-page and download a CSV report from that page and store it at
 `data/trades.csv`.
-
-The script currently uses a cost basis of 0 for any entries marked as 'Gift/Tip'
-on cointracking, this is to be able to report received coins in forks under this
-type on cointracking.
 
 ### data/stocks.json (optional)
 
