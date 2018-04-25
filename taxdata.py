@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import csv
 import json
 
@@ -60,10 +60,10 @@ class Trades:
         group_index = indices('Group')[0]
         buy_coin_index = indices('Cur.')[0]
         buy_amount_index = indices('Buy')[0]
-        buy_value_index = indices('Value in SEK')[0]
+        buy_value_index = indices('Value in USD')[0]
         sell_coin_index = indices('Cur.')[1]
         sell_amount_index = indices('Sell')[0]
-        sell_value_index = indices('Value in SEK')[1]
+        sell_value_index = indices('Value in USD')[1]
 
         trades = []
         for line in lines[1:]:
@@ -114,3 +114,32 @@ class TaxEvent:
             for event in d["trades"]:
                 events.append(TaxEvent(event["amount"], event["name"], event["income"], event["costbase"]))
             return events
+
+import pandas
+import dateutil
+
+def read_rates(df):
+    x = []
+    for index, row in df.iterrows():
+        date = dateutil.parser.parse(row["Date"])
+        close = row["Close"]
+        x.append([date, close])
+    return x
+eursek = read_rates(pandas.read_csv("data/rates/eursek.csv"))
+usdsek = read_rates(pandas.read_csv("data/rates/usdsek.csv"))
+
+def to_sek(date, symbol):
+    def find_date(rate_table, wanted_date):
+        for rate in rate_table:
+            date = rate[0]
+            price = rate[1]
+            if date <= wanted_date and wanted_date < (date + timedelta(days=1)):
+                return price
+        raise Exception("Didn't find an entry for date %s" % wanted_date)
+
+    if symbol == "USD":
+        return find_date(usdsek, date)
+    elif symbol == "EUR":
+        return find_date(eursek, date)
+    else:
+        raise Exception("No price data for: %s, %s" % (str(date), symbol))

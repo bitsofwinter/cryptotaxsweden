@@ -1,6 +1,6 @@
 import os
 
-from taxdata import TaxEvent, Trade
+from taxdata import TaxEvent, Trade, to_sek
 from k4page import K4Section, K4Page
 
 
@@ -56,6 +56,11 @@ def compute_tax(trades, from_date, to_date, native_currency='SEK', exclude_group
             break
         elif trade.group in exclude_groups:
             continue
+
+        if type(trade.sell_value) == float:
+            trade.sell_value *= to_sek(trade.date, "USD")
+        if type(trade.buy_value) == float:
+            trade.buy_value *= to_sek(trade.date, "USD")
 
         if trade.type == 'Trade':
             buy_coin = get_buy_coin(trade)
