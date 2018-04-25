@@ -122,19 +122,23 @@ def read_rates(df):
     x = []
     for index, row in df.iterrows():
         date = dateutil.parser.parse(row["Date"])
-        close = row["Close"]
+        close = row["Price"]
         x.append([date, close])
+    x.sort(key=lambda x: x[0])
     return x
-eursek = read_rates(pandas.read_csv("data/rates/eursek.csv"))
 usdsek = read_rates(pandas.read_csv("data/rates/usdsek.csv"))
 
 def to_sek(date, symbol):
     def find_date(rate_table, wanted_date):
+        prev_date = None
+        prev_price = None
         for rate in rate_table:
             date = rate[0]
             price = rate[1]
-            if date <= wanted_date and wanted_date < (date + timedelta(days=1)):
-                return price
+            if prev_date and prev_date <= wanted_date and wanted_date < date:
+                return prev_price
+            prev_date = date
+            prev_price = price
         raise Exception("Didn't find an entry for date %s" % wanted_date)
 
     if symbol == "USD":
