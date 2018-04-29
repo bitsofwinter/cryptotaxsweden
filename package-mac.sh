@@ -24,6 +24,8 @@ cp LICENSE $distbase/$distdir/
 mkdir $distbase/$distdir/data
 cp data/personal_details_template.json $distbase/$distdir/data/
 cp data/stocks_template.json $distbase/$distdir/data/
+mkdir $distbase/$distdir/data/rates
+cp data/rates/usdsek.csv $distbase/$distdir/data/rates/
 mkdir $distbase/$distdir/docs
 cp docs/K4.pdf $distbase/$distdir/docs/
 cd $distbase

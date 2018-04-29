@@ -141,6 +141,7 @@ usage: report.py [-h] [--trades TRADES] [--out OUT] [--format {pdf,sru}]
                  [--exclude-groups [EXCLUDE_GROUPS [EXCLUDE_GROUPS ...]]]
                  [--coin-report] [--simplified-k4] [--rounding-report]
                  [--rounding-report-threshold ROUNDING_REPORT_THRESHOLD]
+                 [--cointracking-usd]
                  year
 
 Swedish cryptocurrency tax reporting script
@@ -167,6 +168,9 @@ optional arguments:
   --rounding-report-threshold ROUNDING_REPORT_THRESHOLD
                         The number of percent difference required for an
                         amount to be included in the report.
+  --cointracking-usd    Use this flag if you have configured cointracking
+                        calculate prices in USD. Conversion from USD to SEK
+                        will then be done by this script instead.
 ```
 
 ### Example

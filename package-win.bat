@@ -11,7 +11,7 @@ git clone . %repo%
 
 cd %repo%
 virtualenv venv
-. venv\bin\activate
+call venv\scripts\activate.bat
 pip install -r requirements.txt
 pip install pyinstaller
 pyinstaller --onefile report.py
@@ -22,6 +22,8 @@ copy LICENSE %distbase%\%distdir%\
 mkdir %distbase%\%distdir%\data
 copy data\personal_details_template.json %distbase%\%distdir%\data\
 copy data\stocks_template.json %distbase%\%distdir%\data\
+mkdir %distbase%\%distdir%\data\rates
+copy data\rates\usdsek.csv %distbase%\%distdir%\data\rates\
 mkdir %distbase%\%distdir%\docs
 copy docs\K4.pdf %distbase%\%distdir%\docs\
 cd %distbase%
