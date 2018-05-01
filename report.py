@@ -44,7 +44,7 @@ tax_events = tax.compute_tax(trades,
                              exclude_groups=opts.exclude_groups if opts.exclude_groups else [],
                              coin_report_filename=os.path.join(opts.out, "coin_report.csv") if opts.coin_report else None
                              )
-if not tax_events:
+if tax_events is None:
     print(f"Aborting tax computation.")
     sys.exit(1)
 
