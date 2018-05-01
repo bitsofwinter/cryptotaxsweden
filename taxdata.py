@@ -30,9 +30,10 @@ class Fees:
 
 
 class Trade:
-    def __init__(self, date:datetime, type, group,
+    def __init__(self, lineno, date:datetime, type, group,
                  buy_coin, buy_amount, buy_value,
                  sell_coin, sell_amount, sell_value):
+        self.lineno = lineno
         self.date = date
         self.type = type
         self.group = group
@@ -100,8 +101,10 @@ class Trades:
         sell_value_index = indices(price_field_name)[1]
 
         trades = []
+        lineno = 2
         for line in lines[1:]:
             trade = Trade(
+                lineno,
                 datetime.strptime(line[date_index], "%d.%m.%Y %H:%M"),
                 line[type_index],
                 None if line[group_index] == '-' else line[group_index],
@@ -119,6 +122,7 @@ class Trades:
                 if trade.sell_value:
                     trade.sell_value *= usdsek_rate
             trades.append(trade)
+            lineno += 1
 
         trades.sort(key=lambda x: x.date)
 

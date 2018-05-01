@@ -1,6 +1,7 @@
 import argparse
 import datetime
 import os
+import sys
 from enum import Enum
 
 from taxdata import PersonalDetails, Fees, Trades, TaxEvent
@@ -43,6 +44,9 @@ tax_events = tax.compute_tax(trades,
                              exclude_groups=opts.exclude_groups if opts.exclude_groups else [],
                              coin_report_filename=os.path.join(opts.out, "coin_report.csv") if opts.coin_report else None
                              )
+if not tax_events:
+    print(f"Aborting tax computation.")
+    sys.exit(1)
 
 if opts.simplified_k4:
     tax_events = tax.aggregate_per_coin(tax_events)
