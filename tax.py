@@ -98,11 +98,11 @@ def compute_tax(trades, from_date, to_date, native_currency='SEK', exclude_group
 
     if coin_report_filename:
         with open(coin_report_filename, "w") as f:
-            f.write("Amount\tCoin\tCost basis\n")
+            f.write(f"{'Amount'.ljust(14)}{'Coin'.ljust(8)}{'Cost basis'.ljust(10)}\n")
             coin_list = [coin for (_, coin) in coins.items() if coin.amount > 1e-9]
             coin_list.sort(key=lambda coin: coin.symbol)
             for coin in coin_list:
-                f.write(f"{coin.amount}\t{coin.symbol}\t{coin.cost_basis}\n")
+                f.write(f"{str(coin.amount)[:12].ljust(14)}{str(coin.symbol).ljust(8)}{str(coin.cost_basis)[:8].ljust(10)}\n")
 
     return tax_events
 
