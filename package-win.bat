@@ -25,6 +25,6 @@ copy data\stocks_template.json %distbase%\%distdir%\data\
 mkdir %distbase%\%distdir%\data\rates
 copy data\rates\usdsek.csv %distbase%\%distdir%\data\rates\
 mkdir %distbase%\%distdir%\docs
-copy docs\K4.pdf %distbase%\%distdir%\docs\
+copy docs\K4-template-*.pdf %distbase%\%distdir%\docs\
 cd %distbase%
 "c:\Program Files\7-Zip\7z.exe" a -r %package% %distdir%

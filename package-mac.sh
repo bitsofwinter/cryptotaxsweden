@@ -27,6 +27,6 @@ cp data/stocks_template.json $distbase/$distdir/data/
 mkdir $distbase/$distdir/data/rates
 cp data/rates/usdsek.csv $distbase/$distdir/data/rates/
 mkdir $distbase/$distdir/docs
-cp docs/K4.pdf $distbase/$distdir/docs/
+cp docs/K4-template-*.pdf $distbase/$distdir/docs/
 cd $distbase
 zip -r $package $distdir

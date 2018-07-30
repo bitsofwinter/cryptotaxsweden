@@ -130,5 +130,8 @@ class K4Page:
             os.makedirs(destination_folder)
         pagestr = "%02d" % self._page_number
 
-        form = merge([generate_page_1_overlay(), generate_page_2_overlay()], template_path='docs/K4.pdf')
+        template_filename = f"docs/K4-template-{self._year}.pdf"
+        if not os.path.exists(template_filename):
+            raise Exception(f"K4 template pdf for {self._year} not available at {template_filename}")
+        form = merge([generate_page_1_overlay(), generate_page_2_overlay()], template_path=template_filename)
         save(form, filename=f"{destination_folder}/k4_no{pagestr}.pdf")
