@@ -4,7 +4,7 @@ import os
 import sys
 from enum import Enum
 
-from taxdata import PersonalDetails, Fees, Trades, TaxEvent
+from taxdata import PersonalDetails, Trades, TaxEvent
 import tax
 
 
