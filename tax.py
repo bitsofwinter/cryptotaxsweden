@@ -9,10 +9,11 @@ def is_fiat(coin):
 
 
 class Coin:
-    def __init__(self, symbol):
+    def __init__(self, symbol, max_overdraft):
         self.symbol = symbol
         self.amount = 0.0
         self.cost_basis = 0.0
+        self.max_overdraft = max_overdraft
 
     def buy(self, amount:float, price:float):
         new_amount = self.amount + amount
@@ -21,7 +22,7 @@ class Coin:
 
     def sell(self, amount:float, price:float) -> TaxEvent:
         amount_left = self.amount - amount
-        if amount_left < -1e-9:
+        if amount_left < -self.max_overdraft:
             raise Exception(f"Not enough coins available for {self.symbol}, {self.amount} < {amount}.")
         if amount_left < 0.0:
             amount_left = 0.0
@@ -33,7 +34,7 @@ class Coin:
         return tax_event
 
 
-def compute_tax(trades, from_date, to_date, native_currency='SEK', exclude_groups=[], coin_report_filename=None):
+def compute_tax(trades, from_date, to_date, max_overdraft, native_currency='SEK', exclude_groups=[], coin_report_filename=None):
     tax_events = []
     coins = {}
 
@@ -41,7 +42,7 @@ def compute_tax(trades, from_date, to_date, native_currency='SEK', exclude_group
         if trade.buy_coin == native_currency:
             return None
         if trade.buy_coin not in coins:
-            coins[trade.buy_coin] = Coin(trade.buy_coin)
+            coins[trade.buy_coin] = Coin(trade.buy_coin, max_overdraft)
         return coins[trade.buy_coin]
 
     def get_sell_coin(trade:Trade):

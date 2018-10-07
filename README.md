@@ -171,6 +171,10 @@ optional arguments:
   --cointracking-usd    Use this flag if you have configured cointracking
                         calculate prices in USD. Conversion from USD to SEK
                         will then be done by this script instead.
+  --max-overdraft MAX_OVERDRAFT
+                        The maximum overdraft to allow for each coin, at the
+                        event of an overdraft the coin balance will be set to
+                        zero.
 ```
 
 ### Example
