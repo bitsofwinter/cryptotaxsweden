@@ -124,6 +124,7 @@ class Trades:
             trades.append(trade)
             lineno += 1
 
+        trades.reverse()
         trades.sort(key=lambda x: x.date)
 
         return Trades(trades)
