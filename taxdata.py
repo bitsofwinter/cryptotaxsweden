@@ -160,3 +160,16 @@ class TaxEvent:
             for event in d["trades"]:
                 events.append(TaxEvent(event["amount"], event["name"], event["income"], event["costbase"]))
             return events
+
+
+class TradeEvent:
+    def __init__(self, date, name, amount, price, total_amount_before, total_amount_after, cost_basis_before, cost_basis_after, tax_event):
+        self.date = date
+        self.name = name
+        self.amount = amount
+        self.price = price
+        self.total_amount_before = total_amount_before
+        self.total_amount_after = total_amount_after
+        self.cost_basis_before = cost_basis_before
+        self.cost_basis_after = cost_basis_after
+        self.tax_event = tax_event

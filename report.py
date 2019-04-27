@@ -39,7 +39,7 @@ personal_details = PersonalDetails.read_from("data/personal_details.json")
 trades = Trades.read_from(opts.trades, opts.cointracking_usd)
 stock_tax_events = TaxEvent.read_stock_tax_events_from("data/stocks.json") if os.path.exists("data/stocks.json") else None
 
-tax_events = tax.compute_tax(trades,
+tax_events, trade_events = tax.compute_tax(trades,
                              datetime.datetime(year=opts.year,month=1,day=1,hour=0, minute=0),
                              datetime.datetime(year=opts.year,month=12,day=31,hour=23, minute=59),
                              opts.max_overdraft,
@@ -67,5 +67,7 @@ if opts.format == Format.sru:
     tax.generate_k4_sru(pages, personal_details, opts.out)
 elif opts.format == Format.pdf:
     tax.generate_k4_pdf(pages, opts.out)
+
+tax.generate_calculation_report(trade_events)
 
 tax.output_totals(tax_events, stock_tax_events=stock_tax_events)

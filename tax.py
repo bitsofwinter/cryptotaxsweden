@@ -1,6 +1,6 @@
 import os
 
-from taxdata import TaxEvent, Trade
+from taxdata import TaxEvent, Trade, TradeEvent
 from k4page import K4Section, K4Page
 
 
@@ -9,18 +9,21 @@ def is_fiat(coin):
 
 
 class Coin:
-    def __init__(self, symbol, max_overdraft):
+    def __init__(self, symbol, max_overdraft, trade_events):
         self.symbol = symbol
         self.amount = 0.0
         self.cost_basis = 0.0
         self.max_overdraft = max_overdraft
+        self.trade_events = trade_events
 
-    def buy(self, amount:float, price:float):
+    def buy(self, amount:float, price:float, date):
         new_amount = self.amount + amount
-        self.cost_basis = (self.cost_basis * self.amount + price) / new_amount
+        new_cost_basis = (self.cost_basis * self.amount + price) / new_amount
+        self.trade_events.append(TradeEvent(date, self.symbol, amount, price, self.amount, new_amount, self.cost_basis, new_cost_basis, None))
         self.amount = new_amount
+        self.cost_basis = new_cost_basis
 
-    def sell(self, amount:float, price:float) -> TaxEvent:
+    def sell(self, amount:float, price:float, date) -> TaxEvent:
         amount_left = self.amount - amount
         if amount_left < -self.max_overdraft:
             raise Exception(f"Not enough coins available for {self.symbol}, {self.amount} < {amount}.")
@@ -28,6 +31,7 @@ class Coin:
             amount_left = 0.0
 
         tax_event = TaxEvent(amount, self.symbol, price, self.cost_basis * amount)
+        self.trade_events.append(TradeEvent(date, self.symbol, -amount, price, self.amount, amount_left, self.cost_basis, self.cost_basis, tax_event))
 
         self.amount = amount_left
 
@@ -36,13 +40,14 @@ class Coin:
 
 def compute_tax(trades, from_date, to_date, max_overdraft, native_currency='SEK', exclude_groups=[], coin_report_filename=None):
     tax_events = []
+    trade_events = []
     coins = {}
 
     def get_buy_coin(trade:Trade):
         if trade.buy_coin == native_currency:
             return None
         if trade.buy_coin not in coins:
-            coins[trade.buy_coin] = Coin(trade.buy_coin, max_overdraft)
+            coins[trade.buy_coin] = Coin(trade.buy_coin, max_overdraft, trade_events)
         return coins[trade.buy_coin]
 
     def get_sell_coin(trade:Trade):
@@ -70,26 +75,26 @@ def compute_tax(trades, from_date, to_date, max_overdraft, native_currency='SEK'
                     value_sek = trade.buy_value
 
                 if buy_coin:
-                    buy_coin.buy(trade.buy_amount, value_sek)
+                    buy_coin.buy(trade.buy_amount, value_sek, trade.date)
                 if sell_coin:
-                    tax_event = sell_coin.sell(trade.sell_amount, value_sek)
+                    tax_event = sell_coin.sell(trade.sell_amount, value_sek, trade.date)
                     if trade.date >= from_date:
                         tax_events.append(tax_event)
 
             elif trade.type == 'Mining':
                 buy_coin = get_buy_coin(trade)
                 if buy_coin:
-                    buy_coin.buy(trade.buy_amount, trade.buy_value)
+                    buy_coin.buy(trade.buy_amount, trade.buy_value, trade.date)
 
             elif trade.type == 'Gift/Tip':
                 buy_coin = get_buy_coin(trade)
                 if buy_coin:
-                    buy_coin.buy(trade.buy_amount, 0.0)
+                    buy_coin.buy(trade.buy_amount, 0.0, trade.date)
 
             elif trade.type == 'Spend':
                 sell_coin = get_sell_coin(trade)
                 if sell_coin:
-                    tax_event = sell_coin.sell(trade.sell_amount, trade.sell_value)
+                    tax_event = sell_coin.sell(trade.sell_amount, trade.sell_value, trade.date)
                     if trade.date >= from_date:
                         tax_events.append(tax_event)
 
@@ -105,7 +110,7 @@ def compute_tax(trades, from_date, to_date, max_overdraft, native_currency='SEK'
             for coin in coin_list:
                 f.write(f"{str(coin.amount)[:12].ljust(14)}{str(coin.symbol).ljust(8)}{str(coin.cost_basis)[:8].ljust(10)}\n")
 
-    return tax_events
+    return tax_events, trade_events
 
 
 def aggregate_per_coin(tax_events):
@@ -270,6 +275,23 @@ def generate_k4_sru(pages, personal_details, destination_folder):
 def generate_k4_pdf(pages, destination_folder):
     for page in pages:
         page.generate_pdf(destination_folder)
+
+
+def generate_calculation_report(trade_events):
+    symbols = list(set([t.name for t in trade_events]))
+    symbols.sort()
+
+    for symbol in symbols:
+        with open(f"out/calculcation_report_{symbol}.csv", "w") as f:
+            f.write("Datum\tHändelse\tAntal\tPris\tTotalt antal\tTotalt omkostnadsbelopp\tGenomsnittligt omkostnadsbelopp\tVinst\tFörlust\n")
+            for t in trade_events:
+                if t.name == symbol:
+                    if t.amount > 0:
+                        f.write(f"{t.date}\tKöp\t{t.amount}\t{t.price}\t{t.total_amount_after}\t{t.cost_basis_after*t.total_amount_after}\t{t.cost_basis_after}\t\t\n")
+                    if t.amount < 0:
+                        profit = t.tax_event.profit() if t.tax_event.profit() > 0 else ''
+                        loss = -t.tax_event.profit() if t.tax_event.profit() < 0 else ''
+                        f.write(f"{t.date}\tSälj\t{t.amount}\t{t.price}\t{t.total_amount_after}\t{t.cost_basis_after*t.total_amount_after}\t{t.cost_basis_after}\t{profit}\t{loss}\n")
 
 
 def output_totals(tax_events, stock_tax_events = None):
