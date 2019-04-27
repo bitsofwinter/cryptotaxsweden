@@ -278,21 +278,27 @@ def generate_k4_pdf(pages, destination_folder):
 
 
 def generate_calculation_report(trade_events):
+
+    def write_csv(f, trade_events):
+        f.write("Datum\tSymbol\tHändelse\tAntal\tPris\tTotalt antal\tTotalt omkostnadsbelopp\tGenomsnittligt omkostnadsbelopp\tVinst\tFörlust\n")
+        for t in trade_events:
+            if t.amount > 0:
+                f.write(f"{t.date}\t{t.name}\tKöp\t{t.amount}\t{t.price}\t{t.total_amount_after}\t{t.cost_basis_after*t.total_amount_after}\t{t.cost_basis_after}\t\t\n")
+            if t.amount < 0:
+                profit = t.tax_event.profit() if t.tax_event.profit() > 0 else ''
+                loss = -t.tax_event.profit() if t.tax_event.profit() < 0 else ''
+                f.write(f"{t.date}\t{t.name}\tSälj\t{t.amount}\t{t.price}\t{t.total_amount_after}\t{t.cost_basis_after*t.total_amount_after}\t{t.cost_basis_after}\t{profit}\t{loss}\n")
+
+    # Write report
+    with open(f"out/calculcation_report.csv", "w") as f:
+        write_csv(f, trade_events)
+
+    # Write individual reports per coin
     symbols = list(set([t.name for t in trade_events]))
     symbols.sort()
-
     for symbol in symbols:
         with open(f"out/calculcation_report_{symbol}.csv", "w") as f:
-            f.write("Datum\tHändelse\tAntal\tPris\tTotalt antal\tTotalt omkostnadsbelopp\tGenomsnittligt omkostnadsbelopp\tVinst\tFörlust\n")
-            for t in trade_events:
-                if t.name == symbol:
-                    if t.amount > 0:
-                        f.write(f"{t.date}\tKöp\t{t.amount}\t{t.price}\t{t.total_amount_after}\t{t.cost_basis_after*t.total_amount_after}\t{t.cost_basis_after}\t\t\n")
-                    if t.amount < 0:
-                        profit = t.tax_event.profit() if t.tax_event.profit() > 0 else ''
-                        loss = -t.tax_event.profit() if t.tax_event.profit() < 0 else ''
-                        f.write(f"{t.date}\tSälj\t{t.amount}\t{t.price}\t{t.total_amount_after}\t{t.cost_basis_after*t.total_amount_after}\t{t.cost_basis_after}\t{profit}\t{loss}\n")
-
+            write_csv(f, [t for t in trade_events if t.name == symbol])
 
 def output_totals(tax_events, stock_tax_events = None):
     crypto_tax_events = [x for x in tax_events if not is_fiat(x.name)]
