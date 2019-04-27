@@ -16,14 +16,14 @@ class Coin:
         self.max_overdraft = max_overdraft
         self.trade_events = trade_events
 
-    def buy(self, amount:float, price:float, date):
+    def buy(self, amount:float, price:float, date, trade_type):
         new_amount = self.amount + amount
         new_cost_basis = (self.cost_basis * self.amount + price) / new_amount
-        self.trade_events.append(TradeEvent(date, self.symbol, amount, price, self.amount, new_amount, self.cost_basis, new_cost_basis, None))
+        self.trade_events.append(TradeEvent(date, self.symbol, amount, price, self.amount, new_amount, self.cost_basis, new_cost_basis, None, trade_type))
         self.amount = new_amount
         self.cost_basis = new_cost_basis
 
-    def sell(self, amount:float, price:float, date) -> TaxEvent:
+    def sell(self, amount:float, price:float, date, trade_type:str) -> TaxEvent:
         amount_left = self.amount - amount
         if amount_left < -self.max_overdraft:
             raise Exception(f"Not enough coins available for {self.symbol}, {self.amount} < {amount}.")
@@ -31,7 +31,7 @@ class Coin:
             amount_left = 0.0
 
         tax_event = TaxEvent(amount, self.symbol, price, self.cost_basis * amount)
-        self.trade_events.append(TradeEvent(date, self.symbol, -amount, price, self.amount, amount_left, self.cost_basis, self.cost_basis, tax_event))
+        self.trade_events.append(TradeEvent(date, self.symbol, -amount, price, self.amount, amount_left, self.cost_basis, self.cost_basis, tax_event, trade_type))
 
         self.amount = amount_left
 
@@ -75,26 +75,26 @@ def compute_tax(trades, from_date, to_date, max_overdraft, native_currency='SEK'
                     value_sek = trade.buy_value
 
                 if buy_coin:
-                    buy_coin.buy(trade.buy_amount, value_sek, trade.date)
+                    buy_coin.buy(trade.buy_amount, value_sek, trade.date, trade.type)
                 if sell_coin:
-                    tax_event = sell_coin.sell(trade.sell_amount, value_sek, trade.date)
+                    tax_event = sell_coin.sell(trade.sell_amount, value_sek, trade.date, trade.type)
                     if trade.date >= from_date:
                         tax_events.append(tax_event)
 
             elif trade.type == 'Mining':
                 buy_coin = get_buy_coin(trade)
                 if buy_coin:
-                    buy_coin.buy(trade.buy_amount, trade.buy_value, trade.date)
+                    buy_coin.buy(trade.buy_amount, trade.buy_value, trade.date, trade.type)
 
             elif trade.type == 'Gift/Tip':
                 buy_coin = get_buy_coin(trade)
                 if buy_coin:
-                    buy_coin.buy(trade.buy_amount, 0.0, trade.date)
+                    buy_coin.buy(trade.buy_amount, 0.0, trade.date, trade.type)
 
             elif trade.type == 'Spend':
                 sell_coin = get_sell_coin(trade)
                 if sell_coin:
-                    tax_event = sell_coin.sell(trade.sell_amount, trade.sell_value, trade.date)
+                    tax_event = sell_coin.sell(trade.sell_amount, trade.sell_value, trade.date, trade.type)
                     if trade.date >= from_date:
                         tax_events.append(tax_event)
 
@@ -280,14 +280,14 @@ def generate_k4_pdf(pages, destination_folder):
 def generate_calculation_report(trade_events):
 
     def write_csv(f, trade_events):
-        f.write("Datum\tSymbol\tHändelse\tAntal\tPris\tTotalt antal\tTotalt omkostnadsbelopp\tGenomsnittligt omkostnadsbelopp\tVinst\tFörlust\n")
+        f.write("Datum\tSymbol\tTyp\tHändelse\tAntal\tPris\tTotalt antal\tTotalt omkostnadsbelopp\tGenomsnittligt omkostnadsbelopp\tVinst\tFörlust\n")
         for t in trade_events:
             if t.amount > 0:
-                f.write(f"{t.date}\t{t.name}\tKöp\t{t.amount}\t{t.price}\t{t.total_amount_after}\t{t.cost_basis_after*t.total_amount_after}\t{t.cost_basis_after}\t\t\n")
+                f.write(f"{t.date}\t{t.name}\t{t.trade_type}\tKöp\t{t.amount}\t{t.price}\t{t.total_amount_after}\t{t.cost_basis_after*t.total_amount_after}\t{t.cost_basis_after}\t\t\n")
             if t.amount < 0:
                 profit = t.tax_event.profit() if t.tax_event.profit() > 0 else ''
                 loss = -t.tax_event.profit() if t.tax_event.profit() < 0 else ''
-                f.write(f"{t.date}\t{t.name}\tSälj\t{t.amount}\t{t.price}\t{t.total_amount_after}\t{t.cost_basis_after*t.total_amount_after}\t{t.cost_basis_after}\t{profit}\t{loss}\n")
+                f.write(f"{t.date}\t{t.name}\t{t.trade_type}\tSälj\t{t.amount}\t{t.price}\t{t.total_amount_after}\t{t.cost_basis_after*t.total_amount_after}\t{t.cost_basis_after}\t{profit}\t{loss}\n")
 
     # Write report
     with open(f"out/calculcation_report.csv", "w") as f:

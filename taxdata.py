@@ -163,7 +163,7 @@ class TaxEvent:
 
 
 class TradeEvent:
-    def __init__(self, date, name, amount, price, total_amount_before, total_amount_after, cost_basis_before, cost_basis_after, tax_event):
+    def __init__(self, date, name, amount, price, total_amount_before, total_amount_after, cost_basis_before, cost_basis_after, tax_event, trade_type):
         self.date = date
         self.name = name
         self.amount = amount
@@ -173,3 +173,4 @@ class TradeEvent:
         self.cost_basis_before = cost_basis_before
         self.cost_basis_after = cost_basis_after
         self.tax_event = tax_event
+        self.trade_type = trade_type
