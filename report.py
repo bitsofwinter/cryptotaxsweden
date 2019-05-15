@@ -50,6 +50,8 @@ if tax_events is None:
     print(f"Aborting tax computation.")
     sys.exit(1)
 
+tax.generate_calculation_report(trade_events)
+
 if opts.simplified_k4:
     tax_events = tax.aggregate_per_coin(tax_events)
 
@@ -67,7 +69,5 @@ if opts.format == Format.sru:
     tax.generate_k4_sru(pages, personal_details, opts.out)
 elif opts.format == Format.pdf:
     tax.generate_k4_pdf(pages, opts.out)
-
-tax.generate_calculation_report(trade_events)
 
 tax.output_totals(tax_events, stock_tax_events=stock_tax_events)
