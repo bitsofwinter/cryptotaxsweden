@@ -9,3 +9,4 @@ data/personal_details.json
 data/trades*.csv*
 data/fees.json
 data/stocks.json
+.python-version

@@ -123,8 +123,8 @@ This file should have the following format. Make sure to save the file in UTF-8 
 
 To get the data for this file you first need to have your complete trade history
 on [cointracking.info](https://cointracking.info?ref=D611015). Then go to the
-Trade Prices-page and download a CSV report from that page and store it at
-`data/trades.csv`.
+Trade Prices-page and download a CSV report (comma separated version) from that
+page and store it at`data/trades.csv`.
 
 ### data/stocks.json (optional)
 
